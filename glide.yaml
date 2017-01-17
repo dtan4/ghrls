@@ -1,2 +1,5 @@
 package: github.com/dtan4/ghrls
-import: []
+import:
+- package: github.com/google/go-github
+  subpackages:
+  - github

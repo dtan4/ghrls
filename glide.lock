@@ -1,6 +1,14 @@
-hash: 6c0aa6335ad5ff0b22f02f0732825124068630996c00e86841734deea31eaac3
-updated: 2017-01-17T15:25:43.3937353+09:00
+hash: 2d67198811ea0de5c3c431a6894e3e82634d351112413d4467c0cafc5f0a861b
+updated: 2017-01-17T15:54:50.364854991+09:00
 imports:
+- name: github.com/google/go-github
+  version: cec1afe99df659573e7220907135778489b4da91
+  subpackages:
+  - github
+- name: github.com/google/go-querystring
+  version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
+  subpackages:
+  - query
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/spf13/cobra
