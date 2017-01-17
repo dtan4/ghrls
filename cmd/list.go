@@ -28,6 +28,7 @@ to quickly create a Cobra application.`,
 var (
 	headers = []string{
 		"TAG",
+		"TYPE",
 		"CREATEDAT",
 		"NAME",
 	}
@@ -57,21 +58,34 @@ func doList(cmd *cobra.Command, args []string) error {
 
 	client := github.NewClient(httpClient)
 
+	tags, err := client.ListTags(owner, repo)
+	if err != nil {
+		return err
+	}
+
 	releases, err := client.ListReleases(owner, repo)
 	if err != nil {
 		return err
 	}
 
+	releasesMap := github.MakeReleasesMap(releases)
+
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 4, ' ', 0)
 	fmt.Fprintln(w, strings.Join(headers, "\t"))
 
-	for _, release := range releases {
-		ss := []string{*release.TagName, release.CreatedAt.Local().String()}
+	for _, tag := range tags {
+		ss := []string{*tag.Name}
 
-		if release.Name == nil {
-			ss = append(ss, "")
+		if release, ok := releasesMap[*tag.Name]; ok {
+			ss = append(ss, "TAG+RELEASE", release.CreatedAt.Local().String())
+
+			if release.Name == nil {
+				ss = append(ss, "")
+			} else {
+				ss = append(ss, *release.Name)
+			}
 		} else {
-			ss = append(ss, *release.Name)
+			ss = append(ss, "TAG", "", "")
 		}
 
 		fmt.Fprintln(w, strings.Join(ss, "\t"))

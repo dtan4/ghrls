@@ -18,6 +18,17 @@ func NewClient(httpClient *http.Client) *Client {
 	}
 }
 
+// MakeReleasesMap makes map of tag name and release
+func MakeReleasesMap(releases []*github.RepositoryRelease) map[string]*github.RepositoryRelease {
+	result := map[string]*github.RepositoryRelease{}
+
+	for _, release := range releases {
+		result[*release.TagName] = release
+	}
+
+	return result
+}
+
 // ListReleases lists all releases of the given repository
 func (c *Client) ListReleases(owner, repo string) ([]*github.RepositoryRelease, error) {
 	allReleases := []*github.RepositoryRelease{}
