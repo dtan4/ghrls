@@ -1,5 +1,5 @@
-hash: 2d67198811ea0de5c3c431a6894e3e82634d351112413d4467c0cafc5f0a861b
-updated: 2017-01-17T15:54:50.364854991+09:00
+hash: e4e6246f1be92e03b9c2a3fdcea4512e3aaa3d633251af0597742020534f13bf
+updated: 2017-01-17T16:08:30.513524612+09:00
 imports:
 - name: github.com/google/go-github
   version: cec1afe99df659573e7220907135778489b4da91
@@ -15,4 +15,6 @@ imports:
   version: de09d9ce07d0d8a74442cfeaa91628cf9492cc23
 - name: github.com/spf13/pflag
   version: 25f8b5b07aece3207895bf19f7ab517eb3b22a40
+- name: golang.org/x/oauth2
+  version: 3c3a985cb79f52a3190fbc056984415ca6763d01
 testImports: []

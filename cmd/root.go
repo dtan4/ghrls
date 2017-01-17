@@ -24,6 +24,10 @@ to quickly create a Cobra application.`,
 	//	Run: func(cmd *cobra.Command, args []string) { },
 }
 
+var rootOpts = struct {
+	GitHubToken string
+}{}
+
 // Execute adds all child commands to the root command sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
@@ -39,4 +43,7 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	if os.Getenv("GITHUB_TOKEN") != "" {
+		rootOpts.GitHubToken = os.Getenv("GITHUB_TOKEN")
+	}
 }
