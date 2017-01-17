@@ -3,7 +3,9 @@ package cmd
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
+	"text/tabwriter"
 
 	"github.com/dtan4/ghrls/github"
 	"github.com/spf13/cobra"
@@ -22,6 +24,14 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	RunE: doList,
 }
+
+var (
+	headers = []string{
+		"TAG",
+		"CREATEDAT",
+		"NAME",
+	}
+)
 
 func doList(cmd *cobra.Command, args []string) error {
 	if len(args) != 1 {
@@ -47,28 +57,27 @@ func doList(cmd *cobra.Command, args []string) error {
 
 	client := github.NewClient(httpClient)
 
-	fmt.Println("=== tags")
-
-	tags, err := client.ListTags(owner, repo)
-	if err != nil {
-		return err
-	}
-
-	for _, tag := range tags {
-		fmt.Println(*tag.Name)
-	}
-
-	fmt.Println("")
-	fmt.Println("=== releases")
-
 	releases, err := client.ListReleases(owner, repo)
 	if err != nil {
 		return err
 	}
 
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 4, ' ', 0)
+	fmt.Fprintln(w, strings.Join(headers, "\t"))
+
 	for _, release := range releases {
-		fmt.Println(*release.TagName, *release.CreatedAt)
+		ss := []string{*release.TagName, release.CreatedAt.String()}
+
+		if release.Name == nil {
+			ss = append(ss, "")
+		} else {
+			ss = append(ss, *release.Name)
+		}
+
+		fmt.Fprintln(w, strings.Join(ss, "\t"))
 	}
+
+	w.Flush()
 
 	return nil
 }
