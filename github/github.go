@@ -6,6 +6,12 @@ import (
 	"github.com/google/go-github/github"
 )
 
+const (
+	// default: 30, max: 100
+	// https://developer.github.com/v3/#pagination
+	perPage = 100
+)
+
 // Client represents a wrapper of GitHub API client
 type Client struct {
 	client *github.Client
@@ -33,7 +39,9 @@ func MakeReleasesMap(releases []*github.RepositoryRelease) map[string]*github.Re
 func (c *Client) ListReleases(owner, repo string) ([]*github.RepositoryRelease, error) {
 	allReleases := []*github.RepositoryRelease{}
 
-	listOpts := &github.ListOptions{}
+	listOpts := &github.ListOptions{
+		PerPage: perPage,
+	}
 
 	for {
 		releases, resp, err := c.client.Repositories.ListReleases(owner, repo, listOpts)
@@ -57,7 +65,9 @@ func (c *Client) ListReleases(owner, repo string) ([]*github.RepositoryRelease, 
 func (c *Client) ListTags(owner, repo string) ([]*github.RepositoryTag, error) {
 	allTags := []*github.RepositoryTag{}
 
-	listOpts := &github.ListOptions{}
+	listOpts := &github.ListOptions{
+		PerPage: perPage,
+	}
 
 	for {
 		tags, resp, err := c.client.Repositories.ListTags(owner, repo, listOpts)
