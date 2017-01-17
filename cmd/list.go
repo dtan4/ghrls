@@ -66,7 +66,7 @@ func doList(cmd *cobra.Command, args []string) error {
 	fmt.Fprintln(w, strings.Join(headers, "\t"))
 
 	for _, release := range releases {
-		ss := []string{*release.TagName, release.CreatedAt.String()}
+		ss := []string{*release.TagName, release.CreatedAt.Local().String()}
 
 		if release.Name == nil {
 			ss = append(ss, "")
