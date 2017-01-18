@@ -97,13 +97,11 @@ func doGet(cmd *cobra.Command, args []string) error {
 	fmt.Fprintln(w, "URL:\t"+*release.HTMLURL)
 
 	if len(release.Assets) > 0 {
-		fmt.Fprintln(w, "Assets:\t"+*release.Assets[0].BrowserDownloadURL)
+		fmt.Fprintln(w, "Artifacts:\t"+*release.Assets[0].BrowserDownloadURL)
 
 		for _, asset := range release.Assets[1:] {
 			fmt.Fprintln(w, "\t"+*asset.BrowserDownloadURL)
 		}
-	} else {
-		fmt.Fprintln(w, "Assets:\t")
 	}
 
 	w.Flush()
