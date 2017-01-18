@@ -70,11 +70,17 @@ func doList(cmd *cobra.Command, args []string) error {
 
 	tags, err := client.ListTags(owner, repo)
 	if err != nil {
+		if strings.Contains(err.Error(), "404 Not Found") {
+			return fmt.Errorf("%s/%s: not found", owner, repo)
+		}
 		return err
 	}
 
 	releases, err := client.ListReleases(owner, repo)
 	if err != nil {
+		if strings.Contains(err.Error(), "404 Not Found") {
+			return fmt.Errorf("%s/%s: not found", owner, repo)
+		}
 		return err
 	}
 
