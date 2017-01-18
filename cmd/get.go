@@ -67,11 +67,17 @@ func doGet(cmd *cobra.Command, args []string) error {
 
 	release, err := client.GetRelease(owner, repo, tag)
 	if err != nil {
+		if strings.Contains(err.Error(), "404 Not Found") {
+			return fmt.Errorf("%s/%s@%s : not found", owner, repo, tag)
+		}
 		return err
 	}
 
 	commit, err := client.GetTagCommit(owner, repo, tag)
 	if err != nil {
+		if strings.Contains(err.Error(), "404 Not Found") {
+			return fmt.Errorf("%s/%s@%s : not found", owner, repo, tag)
+		}
 		return err
 	}
 
