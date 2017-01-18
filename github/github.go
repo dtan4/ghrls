@@ -35,6 +35,26 @@ func MakeReleasesMap(releases []*github.RepositoryRelease) map[string]*github.Re
 	return result
 }
 
+// GetRelease returns release metadata of the given tag
+func (c *Client) GetRelease(owner, repo, tag string) (*github.RepositoryRelease, error) {
+	release, _, err := c.client.Repositories.GetReleaseByTag(owner, repo, tag)
+	if err != nil {
+		return nil, err
+	}
+
+	return release, nil
+}
+
+// GetTag returns commit metadata of the given tag
+func (c *Client) GetTagCommit(owner, repo, tag string) (*github.RepositoryCommit, error) {
+	commit, _, err := c.client.Repositories.GetCommit(owner, repo, tag)
+	if err != nil {
+		return nil, err
+	}
+
+	return commit, nil
+}
+
 // ListReleases lists all releases of the given repository
 func (c *Client) ListReleases(owner, repo string) ([]*github.RepositoryRelease, error) {
 	allReleases := []*github.RepositoryRelease{}
