@@ -14,14 +14,28 @@ import (
 
 // getCmd represents the get command
 var getCmd = &cobra.Command{
-	Use:   "get",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Use:   "get REPOSITORY TAG",
+	Short: "Describe release information",
+	Long: `Describe release information
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+Example:
+
+$ ghrls get kubernetes/kubernetes v1.5.2
+Tag:         v1.5.2
+Commit:      08e099554f3c31f6e6f07b448ab3ed78d0520507
+Name:        v1.5.2
+Author:      saad-ali
+CreatedAt:   2017-01-12 13:51:15 +0900 JST
+PublishedAt: 2017-01-12 16:25:50 +0900 JST
+URL:         https://github.com/kubernetes/kubernetes/releases/tag/v1.5.2
+Assets:      https://github.com/kubernetes/kubernetes/releases/download/v1.5.2/kubernetes.tar.gz
+
+See [kubernetes-announce@](https://groups.google.com/forum/#!forum/kubernetes-announce) and [CHANGELOG](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG.md#v152) for details.
+` +
+		"SHA256 for `kubernetes.tar.gz`: `67344958325a70348db5c4e35e59f9c3552232cdc34defb8a0a799ed91c671a3`" +
+		`
+Additional binary downloads are linked in the [CHANGELOG](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG.md#downloads-for-v152).
+`,
 	RunE: doGet,
 }
 
