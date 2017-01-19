@@ -1,5 +1,7 @@
 # ghrls(1)
 
+[![Build Status](https://travis-ci.org/dtan4/ghrls.svg?branch=master)](https://travis-ci.org/dtan4/ghrls)
+
 List & Describe GitHub Releases
 
 ```bash
