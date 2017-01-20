@@ -3,7 +3,7 @@ VERSION  := v0.1.0
 REVISION := $(shell git rev-parse --short HEAD)
 
 SRCS    := $(shell find . -type f -name '*.go')
-LDFLAGS := -ldflags="-s -w -X \"main.Version=$(VERSION)\" -X \"main.Revision=$(REVISION)\" -extldflags \"-static\""
+LDFLAGS := -ldflags="-s -w -X \"github.com/dtan4/ghrls/version.Version=$(VERSION)\" -X \"github.com/dtan4/ghrls/version.Revision=$(REVISION)\" -extldflags \"-static\""
 
 DIST_DIRS := find * -type d -exec
 
