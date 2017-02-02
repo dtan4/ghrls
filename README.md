@@ -46,8 +46,10 @@ $ make install
 
 ### (Recommended) Set `GITHUB_TOKEN` environment variable
 
-`ghrls` can be used without any special token as default. However, according to [GitHub API Rate Limiting](https://developer.github.com/v3/#rate-limiting), unauthenticated user is allowed to make up to 60 requests per hour. In contrast, authenticated user (using `GITHUB_TOKEN`) can make up to 5,000 requests per hour.
-In addition, authentication is required to access to yourt private repositories.
+`ghrls` can be used without any special token as default.
+However, according to [GitHub API Rate Limiting](https://developer.github.com/v3/#rate-limiting), unauthenticated user is allowed to make up to 60 requests per hour.
+In contrast, authenticated user (using `GITHUB_TOKEN`) can make up to 5,000 requests per hour.
+Authentication is required to access to yourt private repositories, of course.
 
 I strongly recommend to set `GITHUB_TOKEN` in your shell. `GITHUB_TOKEN` can be obtained from [here](https://github.com/settings/tokens).
 
