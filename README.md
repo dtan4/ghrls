@@ -20,7 +20,18 @@ v1.5.0-beta.2     TAG+RELEASE    2016-11-25 07:29:04 +0900 JST    v1.5.0-beta.2
 
 ## Installation
 
-TBD
+### Using Homebrew (OS X only)
+
+Formula is available at [dtan4/homebrew-tools](https://github.com/dtan4/homebrew-tools).
+
+```bash
+$ brew tap dtan4/tools
+$ brew install ghrls
+```
+
+### Precompiled binary
+
+Precompiled binaries for Windows, OS X, Linux are available at [Releases](https://github.com/dtan4/ghrls/releases).
 
 ### From source
 
