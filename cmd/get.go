@@ -65,15 +65,7 @@ func doGet(cmd *cobra.Command, args []string) error {
 
 	client := github.NewClient(httpClient)
 
-	release, err := client.GetRelease(owner, repo, tag)
-	if err != nil {
-		if strings.Contains(err.Error(), "404 Not Found") {
-			return fmt.Errorf("%s/%s@%s : not found", owner, repo, tag)
-		}
-		return err
-	}
-
-	commit, err := client.GetTagCommit(owner, repo, tag)
+	t, err := client.DescribeRelease(owner, repo, tag)
 	if err != nil {
 		if strings.Contains(err.Error(), "404 Not Found") {
 			return fmt.Errorf("%s/%s@%s : not found", owner, repo, tag)
@@ -82,33 +74,27 @@ func doGet(cmd *cobra.Command, args []string) error {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
-	fmt.Fprintln(w, "Tag:\t"+*release.TagName)
-	fmt.Fprintln(w, "Commit:\t"+*commit.SHA)
+	fmt.Fprintln(w, "Tag:\t"+t.Name)
+	fmt.Fprintln(w, "Commit:\t"+t.Release.Commit)
+	fmt.Fprintln(w, "Name:\t"+t.Release.Name)
+	fmt.Fprintln(w, "Author:\t"+t.Release.Author)
+	fmt.Fprintln(w, "CreatedAt:\t"+t.Release.CreatedAt.Local().String())
+	fmt.Fprintln(w, "PublishedAt:\t"+t.Release.PublishedAt.Local().String())
+	fmt.Fprintln(w, "URL:\t"+t.Release.URL)
 
-	if release.Name == nil {
-		fmt.Fprintln(w, "Name:\t")
-	} else {
-		fmt.Fprintln(w, "Name:\t"+*release.Name)
-	}
+	if len(t.Release.ArtifactURLs) > 0 {
+		fmt.Fprintln(w, "Artifacts:\t"+t.Release.ArtifactURLs[0])
 
-	fmt.Fprintln(w, "Author:\t"+*release.Author.Login)
-	fmt.Fprintln(w, "CreatedAt:\t"+release.CreatedAt.Local().String())
-	fmt.Fprintln(w, "PublishedAt:\t"+release.PublishedAt.Local().String())
-	fmt.Fprintln(w, "URL:\t"+*release.HTMLURL)
-
-	if len(release.Assets) > 0 {
-		fmt.Fprintln(w, "Artifacts:\t"+*release.Assets[0].BrowserDownloadURL)
-
-		for _, asset := range release.Assets[1:] {
-			fmt.Fprintln(w, "\t"+*asset.BrowserDownloadURL)
+		for _, url := range t.Release.ArtifactURLs[1:] {
+			fmt.Fprintln(w, "\t"+url)
 		}
 	}
 
 	w.Flush()
 
-	if release.Body != nil {
+	if t.Release.Body != "" {
 		fmt.Println("")
-		fmt.Println(*release.Body)
+		fmt.Println(t.Release.Body)
 	}
 
 	return nil
