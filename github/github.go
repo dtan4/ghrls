@@ -43,7 +43,7 @@ func NewClient(httpClient *http.Client) *Client {
 }
 
 // MakeReleasesMap makes map of tag name and release
-func MakeReleasesMap(releases []*github.RepositoryRelease) map[string]*github.RepositoryRelease {
+func makeReleaseMap(releases []*github.RepositoryRelease) map[string]*github.RepositoryRelease {
 	result := map[string]*github.RepositoryRelease{}
 
 	for _, release := range releases {
@@ -75,17 +75,17 @@ func (c *Client) GetTagCommit(owner, repo, tag string) (*github.RepositoryCommit
 
 // ListTagsNew retrieves all tags and releases of the given repository
 func (c *Client) ListTagsNew(owner, repo string) ([]*Tag, error) {
-	tags, err := c.ListTags(owner, repo)
+	tags, err := c.listTags(owner, repo)
 	if err != nil {
 		return []*Tag{}, err
 	}
 
-	releases, err := c.ListReleases(owner, repo)
+	releases, err := c.listReleases(owner, repo)
 	if err != nil {
 		return []*Tag{}, err
 	}
 
-	releasesMap := MakeReleasesMap(releases)
+	releasesMap := makeReleaseMap(releases)
 
 	ts := []*Tag{}
 
@@ -132,7 +132,7 @@ func (c *Client) ListTagsNew(owner, repo string) ([]*Tag, error) {
 }
 
 // ListReleases lists all releases of the given repository
-func (c *Client) ListReleases(owner, repo string) ([]*github.RepositoryRelease, error) {
+func (c *Client) listReleases(owner, repo string) ([]*github.RepositoryRelease, error) {
 	allReleases := []*github.RepositoryRelease{}
 
 	listOpts := &github.ListOptions{
@@ -158,7 +158,7 @@ func (c *Client) ListReleases(owner, repo string) ([]*github.RepositoryRelease, 
 }
 
 // ListTags lists all tags of the given repository
-func (c *Client) ListTags(owner, repo string) ([]*github.RepositoryTag, error) {
+func (c *Client) listTags(owner, repo string) ([]*github.RepositoryTag, error) {
 	allTags := []*github.RepositoryTag{}
 
 	listOpts := &github.ListOptions{

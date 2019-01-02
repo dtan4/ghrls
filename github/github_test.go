@@ -127,29 +127,3 @@ func TestListTagsNew(t *testing.T) {
 		}
 	}
 }
-
-func TestListReleases(t *testing.T) {
-	c := &Client{
-		repositories: fakeRepositoriesService{},
-	}
-
-	owner := "owner"
-	repo := "repo"
-
-	if _, err := c.ListReleases(owner, repo); err != nil {
-		t.Errorf("want no error, got %#v", err)
-	}
-}
-
-func TestListTags(t *testing.T) {
-	c := &Client{
-		repositories: fakeRepositoriesService{},
-	}
-
-	owner := "owner"
-	repo := "repo"
-
-	if _, err := c.ListTags(owner, repo); err != nil {
-		t.Errorf("want no error, got %#v", err)
-	}
-}
