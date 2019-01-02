@@ -81,34 +81,6 @@ func (s fakeRepositoriesService) ListTags(owner string, repo string, opt *github
 	}, &github.Response{}, nil
 }
 
-func TestGetRelease(t *testing.T) {
-	c := &Client{
-		repositories: fakeRepositoriesService{},
-	}
-
-	owner := "owner"
-	repo := "repo"
-	tag := "tag"
-
-	if _, err := c.GetRelease(owner, repo, tag); err != nil {
-		t.Errorf("want no error, got %#v", err)
-	}
-}
-
-func TestGetTagCommit(t *testing.T) {
-	c := &Client{
-		repositories: fakeRepositoriesService{},
-	}
-
-	owner := "owner"
-	repo := "repo"
-	tag := "tag"
-
-	if _, err := c.GetTagCommit(owner, repo, tag); err != nil {
-		t.Errorf("want no error, got %#v", err)
-	}
-}
-
 func TestDescribeRelease(t *testing.T) {
 	c := &Client{
 		repositories: fakeRepositoriesService{},

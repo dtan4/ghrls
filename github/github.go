@@ -50,12 +50,12 @@ func NewClient(httpClient *http.Client) *Client {
 
 // DescribeRelease returns detail of the given release
 func (c *Client) DescribeRelease(owner, repo, tag string) (*Tag, error) {
-	release, err := c.GetRelease(owner, repo, tag)
+	release, err := c.getRelease(owner, repo, tag)
 	if err != nil {
 		return nil, err
 	}
 
-	commit, err := c.GetTagCommit(owner, repo, tag)
+	commit, err := c.getTagCommit(owner, repo, tag)
 	if err != nil {
 		return nil, err
 	}
@@ -116,8 +116,7 @@ func (c *Client) DescribeRelease(owner, repo, tag string) (*Tag, error) {
 	}, nil
 }
 
-// GetRelease returns release metadata of the given tag
-func (c *Client) GetRelease(owner, repo, tag string) (*github.RepositoryRelease, error) {
+func (c *Client) getRelease(owner, repo, tag string) (*github.RepositoryRelease, error) {
 	release, _, err := c.repositories.GetReleaseByTag(owner, repo, tag)
 	if err != nil {
 		return nil, err
@@ -126,8 +125,7 @@ func (c *Client) GetRelease(owner, repo, tag string) (*github.RepositoryRelease,
 	return release, nil
 }
 
-// GetTag returns commit metadata of the given tag
-func (c *Client) GetTagCommit(owner, repo, tag string) (*github.RepositoryCommit, error) {
+func (c *Client) getTagCommit(owner, repo, tag string) (*github.RepositoryCommit, error) {
 	commit, _, err := c.repositories.GetCommit(owner, repo, tag)
 	if err != nil {
 		return nil, err
