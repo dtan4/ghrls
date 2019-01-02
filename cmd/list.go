@@ -68,40 +68,24 @@ func doList(cmd *cobra.Command, args []string) error {
 
 	client := github.NewClient(httpClient)
 
-	tags, err := client.ListTags(owner, repo)
+	tags, err := client.ListTagsNew(owner, repo)
 	if err != nil {
 		if strings.Contains(err.Error(), "404 Not Found") {
 			return fmt.Errorf("%s/%s: not found", owner, repo)
 		}
 		return err
 	}
-
-	releases, err := client.ListReleases(owner, repo)
-	if err != nil {
-		if strings.Contains(err.Error(), "404 Not Found") {
-			return fmt.Errorf("%s/%s: not found", owner, repo)
-		}
-		return err
-	}
-
-	releasesMap := github.MakeReleasesMap(releases)
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 4, ' ', 0)
 	fmt.Fprintln(w, strings.Join(headers, "\t"))
 
 	for _, tag := range tags {
-		ss := []string{*tag.Name}
+		ss := []string{}
 
-		if release, ok := releasesMap[*tag.Name]; ok {
-			ss = append(ss, "TAG+RELEASE", release.CreatedAt.Local().String())
-
-			if release.Name == nil {
-				ss = append(ss, "")
-			} else {
-				ss = append(ss, *release.Name)
-			}
+		if tag.Release != nil {
+			ss = append(ss, tag.Name, "TAG+RELEASE", tag.Release.CreatedAt.Local().String(), tag.Release.Name)
 		} else {
-			ss = append(ss, "TAG", "", "")
+			ss = append(ss, tag.Name, "TAG", "", "")
 		}
 
 		fmt.Fprintln(w, strings.Join(ss, "\t"))
