@@ -26,8 +26,14 @@ type Client struct {
 }
 
 type Release struct {
-	Name      string
-	CreatedAt time.Time
+	ArtifactURLs []string
+	Author       string
+	Body         string
+	Commit       string
+	CreatedAt    time.Time
+	Name         string
+	PublishedAt  time.Time
+	URL          string
 }
 
 type Tag struct {
@@ -42,8 +48,75 @@ func NewClient(httpClient *http.Client) *Client {
 	}
 }
 
-// GetRelease returns release metadata of the given tag
-func (c *Client) GetRelease(owner, repo, tag string) (*github.RepositoryRelease, error) {
+// DescribeRelease returns detail of the given release
+func (c *Client) DescribeRelease(owner, repo, tag string) (*Tag, error) {
+	release, err := c.getRelease(owner, repo, tag)
+	if err != nil {
+		return nil, err
+	}
+
+	commit, err := c.getTagCommit(owner, repo, tag)
+	if err != nil {
+		return nil, err
+	}
+
+	var body, name string
+
+	if release.Body == nil {
+		body = ""
+	} else {
+		body = *release.Body
+	}
+
+	if release.Name == nil {
+		name = ""
+	} else {
+		name = *release.Name
+	}
+
+	artifactURLs := []string{}
+
+	for _, asset := range release.Assets {
+		artifactURLs = append(artifactURLs, *asset.BrowserDownloadURL)
+	}
+
+	createdAt := *release.CreatedAt
+	publishedAt := *release.PublishedAt
+
+	return &Tag{
+		Name: *release.TagName,
+		Release: &Release{
+			ArtifactURLs: artifactURLs,
+			Author:       *release.Author.Login,
+			Body:         body,
+			Commit:       *commit.SHA,
+			CreatedAt: time.Date(
+				createdAt.Year(),
+				createdAt.Month(),
+				createdAt.Day(),
+				createdAt.Hour(),
+				createdAt.Minute(),
+				createdAt.Second(),
+				createdAt.Nanosecond(),
+				createdAt.Location(),
+			),
+			Name: name,
+			PublishedAt: time.Date(
+				publishedAt.Year(),
+				publishedAt.Month(),
+				publishedAt.Day(),
+				publishedAt.Hour(),
+				publishedAt.Minute(),
+				publishedAt.Second(),
+				publishedAt.Nanosecond(),
+				publishedAt.Location(),
+			),
+			URL: *release.HTMLURL,
+		},
+	}, nil
+}
+
+func (c *Client) getRelease(owner, repo, tag string) (*github.RepositoryRelease, error) {
 	release, _, err := c.repositories.GetReleaseByTag(owner, repo, tag)
 	if err != nil {
 		return nil, err
@@ -52,8 +125,7 @@ func (c *Client) GetRelease(owner, repo, tag string) (*github.RepositoryRelease,
 	return release, nil
 }
 
-// GetTag returns commit metadata of the given tag
-func (c *Client) GetTagCommit(owner, repo, tag string) (*github.RepositoryCommit, error) {
+func (c *Client) getTagCommit(owner, repo, tag string) (*github.RepositoryCommit, error) {
 	commit, _, err := c.repositories.GetCommit(owner, repo, tag)
 	if err != nil {
 		return nil, err
