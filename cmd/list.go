@@ -68,7 +68,7 @@ func doList(cmd *cobra.Command, args []string) error {
 
 	client := github.NewClient(httpClient)
 
-	tags, err := client.ListTagsNew(owner, repo)
+	tags, err := client.ListTagsAndReleases(owner, repo)
 	if err != nil {
 		if strings.Contains(err.Error(), "404 Not Found") {
 			return fmt.Errorf("%s/%s: not found", owner, repo)

@@ -83,7 +83,7 @@ func TestGetTagCommit(t *testing.T) {
 	}
 }
 
-func TestListTagsNew(t *testing.T) {
+func TestListTagsAndReleases(t *testing.T) {
 	c := &Client{
 		repositories: fakeRepositoriesService{},
 	}
@@ -112,7 +112,7 @@ func TestListTagsNew(t *testing.T) {
 		},
 	}
 
-	got, err := c.ListTagsNew(owner, repo)
+	got, err := c.ListTagsAndReleases(owner, repo)
 	if err != nil {
 		t.Errorf("want no error, got: %#v", err)
 	}

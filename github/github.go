@@ -73,8 +73,8 @@ func (c *Client) GetTagCommit(owner, repo, tag string) (*github.RepositoryCommit
 	return commit, nil
 }
 
-// ListTagsNew retrieves all tags and releases of the given repository
-func (c *Client) ListTagsNew(owner, repo string) ([]*Tag, error) {
+// ListTagsAndReleases retrieves all tags and releases of the given repository
+func (c *Client) ListTagsAndReleases(owner, repo string) ([]*Tag, error) {
 	tags, err := c.listTags(owner, repo)
 	if err != nil {
 		return []*Tag{}, err
