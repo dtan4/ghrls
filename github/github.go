@@ -12,15 +12,22 @@ const (
 	perPage = 100
 )
 
+type RepositoriesServiceInterface interface {
+	GetReleaseByTag(owner, repo, tag string) (*github.RepositoryRelease, *github.Response, error)
+	GetCommit(owner, repo, sha string) (*github.RepositoryCommit, *github.Response, error)
+	ListReleases(owner, repo string, opt *github.ListOptions) ([]*github.RepositoryRelease, *github.Response, error)
+	ListTags(owner string, repo string, opt *github.ListOptions) ([]*github.RepositoryTag, *github.Response, error)
+}
+
 // Client represents a wrapper of GitHub API client
 type Client struct {
-	client *github.Client
+	repositories RepositoriesServiceInterface
 }
 
 // NewClient creates new Client object
 func NewClient(httpClient *http.Client) *Client {
 	return &Client{
-		client: github.NewClient(httpClient),
+		repositories: github.NewClient(httpClient).Repositories,
 	}
 }
 
@@ -37,7 +44,7 @@ func MakeReleasesMap(releases []*github.RepositoryRelease) map[string]*github.Re
 
 // GetRelease returns release metadata of the given tag
 func (c *Client) GetRelease(owner, repo, tag string) (*github.RepositoryRelease, error) {
-	release, _, err := c.client.Repositories.GetReleaseByTag(owner, repo, tag)
+	release, _, err := c.repositories.GetReleaseByTag(owner, repo, tag)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +54,7 @@ func (c *Client) GetRelease(owner, repo, tag string) (*github.RepositoryRelease,
 
 // GetTag returns commit metadata of the given tag
 func (c *Client) GetTagCommit(owner, repo, tag string) (*github.RepositoryCommit, error) {
-	commit, _, err := c.client.Repositories.GetCommit(owner, repo, tag)
+	commit, _, err := c.repositories.GetCommit(owner, repo, tag)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +71,7 @@ func (c *Client) ListReleases(owner, repo string) ([]*github.RepositoryRelease, 
 	}
 
 	for {
-		releases, resp, err := c.client.Repositories.ListReleases(owner, repo, listOpts)
+		releases, resp, err := c.repositories.ListReleases(owner, repo, listOpts)
 		if err != nil {
 			return []*github.RepositoryRelease{}, err
 		}
@@ -90,7 +97,7 @@ func (c *Client) ListTags(owner, repo string) ([]*github.RepositoryTag, error) {
 	}
 
 	for {
-		tags, resp, err := c.client.Repositories.ListTags(owner, repo, listOpts)
+		tags, resp, err := c.repositories.ListTags(owner, repo, listOpts)
 		if err != nil {
 			return []*github.RepositoryTag{}, err
 		}
