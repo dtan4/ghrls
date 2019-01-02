@@ -2,6 +2,7 @@ package github
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/google/go-github/github"
 )
@@ -22,6 +23,12 @@ type RepositoriesServiceInterface interface {
 // Client represents a wrapper of GitHub API client
 type Client struct {
 	repositories RepositoriesServiceInterface
+}
+
+type Release struct {
+	Name      string
+	Tag       string
+	CreatedAt time.Time
 }
 
 // NewClient creates new Client object
@@ -60,6 +67,53 @@ func (c *Client) GetTagCommit(owner, repo, tag string) (*github.RepositoryCommit
 	}
 
 	return commit, nil
+}
+
+// ListReleasesNew retrieves all tags and releases of the given repository
+func (c *Client) ListReleasesNew(owner, repo string) ([]*Release, error) {
+	releases, err := c.ListReleases(owner, repo)
+	if err != nil {
+		return []*Release{}, err
+	}
+
+	releasesMap := MakeReleasesMap(releases)
+
+	tags, err := c.ListTags(owner, repo)
+	if err != nil {
+		return []*Release{}, err
+	}
+
+	rs := []*Release{}
+
+	for _, tag := range tags {
+		var release *Release
+
+		if r, ok := releasesMap[*tag.Name]; ok {
+			var name string
+
+			if r.Name == nil {
+				name = ""
+			} else {
+				name = *r.Name
+			}
+
+			t := *r.CreatedAt
+
+			release = &Release{
+				Name:      name,
+				Tag:       *tag.Name,
+				CreatedAt: time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), t.Location()),
+			}
+		} else {
+			release = &Release{
+				Tag: *tag.Name,
+			}
+		}
+
+		rs = append(rs, release)
+	}
+
+	return rs, nil
 }
 
 // ListReleases lists all releases of the given repository
