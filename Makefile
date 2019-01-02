@@ -4,6 +4,7 @@ REVISION := $(shell git rev-parse --short HEAD)
 
 SRCS    := $(shell find . -type f -name '*.go')
 LDFLAGS := -ldflags="-s -w -X \"github.com/dtan4/ghrls/version.Version=$(VERSION)\" -X \"github.com/dtan4/ghrls/version.Revision=$(REVISION)\" -extldflags \"-static\""
+NOVENDOR := $(shell go list ./... | grep -v vendor)
 
 DIST_DIRS := find * -type d -exec
 
@@ -14,14 +15,7 @@ bin/$(NAME): $(SRCS)
 
 .PHONY: ci-test
 ci-test:
-	echo "" > coverage.txt
-	for d in `glide novendor`; do \
-		go test -coverprofile=profile.out -covermode=atomic -v $$d; \
-		if [ -f profile.out ]; then \
-			cat profile.out >> coverage.txt; \
-			rm profile.out; \
-		fi; \
-	done
+	go test -coverpkg=./... -coverprofile=coverage.txt -v ./...
 
 .PHONY: clean
 clean:
@@ -36,9 +30,15 @@ cross-build: deps
 		done; \
 	done
 
+.PHONY: dep
+dep:
+ifeq ($(shell command -v dep 2> /dev/null),)
+	go get -u github.com/golang/dep/cmd/dep
+endif
+
 .PHONY: deps
-deps: glide
-	glide install
+deps: dep
+	dep ensure -v
 
 .PHONY: dist
 dist:
@@ -49,20 +49,14 @@ dist:
 	$(DIST_DIRS) zip -r $(NAME)-$(VERSION)-{}.zip {} \; && \
 	cd ..
 
-.PHONY: glide
-glide:
-ifeq ($(shell command -v glide 2> /dev/null),)
-	curl https://glide.sh/get | sh
-endif
-
 .PHONY: install
 install:
 	go install $(LDFLAGS)
 
 .PHONY: test
 test:
-	go test -cover -v `glide novendor`
+	go test -cover -v $(NOVENDOR)
 
 .PHONY: update-deps
-update-deps: glide
-	glide update
+update-deps: dep
+	dep ensure -update -v
