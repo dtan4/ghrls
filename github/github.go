@@ -27,8 +27,12 @@ type Client struct {
 
 type Release struct {
 	Name      string
-	Tag       string
 	CreatedAt time.Time
+}
+
+type Tag struct {
+	Name    string
+	Release *Release
 }
 
 // NewClient creates new Client object
@@ -69,26 +73,26 @@ func (c *Client) GetTagCommit(owner, repo, tag string) (*github.RepositoryCommit
 	return commit, nil
 }
 
-// ListReleasesNew retrieves all tags and releases of the given repository
-func (c *Client) ListReleasesNew(owner, repo string) ([]*Release, error) {
+// ListTagsNew retrieves all tags and releases of the given repository
+func (c *Client) ListTagsNew(owner, repo string) ([]*Tag, error) {
+	tags, err := c.ListTags(owner, repo)
+	if err != nil {
+		return []*Tag{}, err
+	}
+
 	releases, err := c.ListReleases(owner, repo)
 	if err != nil {
-		return []*Release{}, err
+		return []*Tag{}, err
 	}
 
 	releasesMap := MakeReleasesMap(releases)
 
-	tags, err := c.ListTags(owner, repo)
-	if err != nil {
-		return []*Release{}, err
-	}
+	ts := []*Tag{}
 
-	rs := []*Release{}
+	for _, t := range tags {
+		var tag *Tag
 
-	for _, tag := range tags {
-		var release *Release
-
-		if r, ok := releasesMap[*tag.Name]; ok {
+		if r, ok := releasesMap[*t.Name]; ok {
 			var name string
 
 			if r.Name == nil {
@@ -97,23 +101,34 @@ func (c *Client) ListReleasesNew(owner, repo string) ([]*Release, error) {
 				name = *r.Name
 			}
 
-			t := *r.CreatedAt
+			createdAt := *r.CreatedAt
 
-			release = &Release{
-				Name:      name,
-				Tag:       *tag.Name,
-				CreatedAt: time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), t.Location()),
+			tag = &Tag{
+				Name: *t.Name,
+				Release: &Release{
+					Name: name,
+					CreatedAt: time.Date(
+						createdAt.Year(),
+						createdAt.Month(),
+						createdAt.Day(),
+						createdAt.Hour(),
+						createdAt.Minute(),
+						createdAt.Second(),
+						createdAt.Nanosecond(),
+						createdAt.Location(),
+					),
+				},
 			}
 		} else {
-			release = &Release{
-				Tag: *tag.Name,
+			tag = &Tag{
+				Name: *t.Name,
 			}
 		}
 
-		rs = append(rs, release)
+		ts = append(ts, tag)
 	}
 
-	return rs, nil
+	return ts, nil
 }
 
 // ListReleases lists all releases of the given repository

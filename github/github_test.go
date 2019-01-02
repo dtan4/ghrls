@@ -83,7 +83,7 @@ func TestGetTagCommit(t *testing.T) {
 	}
 }
 
-func TestListReleasesNew(t *testing.T) {
+func TestListTagsNew(t *testing.T) {
 	c := &Client{
 		repositories: fakeRepositoriesService{},
 	}
@@ -91,35 +91,39 @@ func TestListReleasesNew(t *testing.T) {
 	owner := "owner"
 	repo := "repo"
 
-	want := []*Release{
-		&Release{
-			Name: "",
-			Tag:  "v1.13.2-beta.1",
+	want := []*Tag{
+		&Tag{
+			Name:    "v1.13.2-beta.1",
+			Release: nil,
 		},
-		&Release{
-			Name:      "",
-			Tag:       "v1.13.2-beta.0",
-			CreatedAt: time.Date(2018, 12, 14, 0, 30, 24, 0, time.UTC),
+		&Tag{
+			Name: "v1.13.2-beta.0",
+			Release: &Release{
+				Name:      "",
+				CreatedAt: time.Date(2018, 12, 14, 0, 30, 24, 0, time.UTC),
+			},
 		},
-		&Release{
-			Name:      "v1.13.1",
-			Tag:       "v1.13.1",
-			CreatedAt: time.Date(2018, 12, 13, 0, 30, 24, 0, time.UTC),
+		&Tag{
+			Name: "v1.13.1",
+			Release: &Release{
+				Name:      "v1.13.1",
+				CreatedAt: time.Date(2018, 12, 13, 0, 30, 24, 0, time.UTC),
+			},
 		},
 	}
 
-	got, err := c.ListReleasesNew(owner, repo)
+	got, err := c.ListTagsNew(owner, repo)
 	if err != nil {
-		t.Errorf("want no error, got %#v", err)
+		t.Errorf("want no error, got: %#v", err)
 	}
 
 	if len(got) != len(want) {
-		t.Errorf("want %d items, got %d items", len(want), len(got))
+		t.Errorf("want: %d items, got: %d items", len(want), len(got))
 	}
 
 	for i, g := range got {
-		if !reflect.DeepEqual(g, want[i]) {
-			t.Errorf("want %#v, got %#v", *want[i], *g)
+		if !reflect.DeepEqual(*g, *want[i]) {
+			t.Errorf("want: %#v, got: %#v", *want[i], *g)
 		}
 	}
 }
