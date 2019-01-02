@@ -2,6 +2,7 @@ package github
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/google/go-github/github"
 )
@@ -24,22 +25,21 @@ type Client struct {
 	repositories RepositoriesServiceInterface
 }
 
+type Release struct {
+	Name      string
+	CreatedAt time.Time
+}
+
+type Tag struct {
+	Name    string
+	Release *Release
+}
+
 // NewClient creates new Client object
 func NewClient(httpClient *http.Client) *Client {
 	return &Client{
 		repositories: github.NewClient(httpClient).Repositories,
 	}
-}
-
-// MakeReleasesMap makes map of tag name and release
-func MakeReleasesMap(releases []*github.RepositoryRelease) map[string]*github.RepositoryRelease {
-	result := map[string]*github.RepositoryRelease{}
-
-	for _, release := range releases {
-		result[*release.TagName] = release
-	}
-
-	return result
 }
 
 // GetRelease returns release metadata of the given tag
@@ -62,8 +62,70 @@ func (c *Client) GetTagCommit(owner, repo, tag string) (*github.RepositoryCommit
 	return commit, nil
 }
 
+// ListTagsAndReleases retrieves all tags and releases of the given repository
+func (c *Client) ListTagsAndReleases(owner, repo string) ([]*Tag, error) {
+	tags, err := c.listTags(owner, repo)
+	if err != nil {
+		return []*Tag{}, err
+	}
+
+	releases, err := c.listReleases(owner, repo)
+	if err != nil {
+		return []*Tag{}, err
+	}
+
+	releasesMap := map[string]*github.RepositoryRelease{}
+
+	for _, release := range releases {
+		releasesMap[*release.TagName] = release
+	}
+
+	ts := []*Tag{}
+
+	for _, t := range tags {
+		var tag *Tag
+
+		if r, ok := releasesMap[*t.Name]; ok {
+			var name string
+
+			if r.Name == nil {
+				name = ""
+			} else {
+				name = *r.Name
+			}
+
+			createdAt := *r.CreatedAt
+
+			tag = &Tag{
+				Name: *t.Name,
+				Release: &Release{
+					Name: name,
+					CreatedAt: time.Date(
+						createdAt.Year(),
+						createdAt.Month(),
+						createdAt.Day(),
+						createdAt.Hour(),
+						createdAt.Minute(),
+						createdAt.Second(),
+						createdAt.Nanosecond(),
+						createdAt.Location(),
+					),
+				},
+			}
+		} else {
+			tag = &Tag{
+				Name: *t.Name,
+			}
+		}
+
+		ts = append(ts, tag)
+	}
+
+	return ts, nil
+}
+
 // ListReleases lists all releases of the given repository
-func (c *Client) ListReleases(owner, repo string) ([]*github.RepositoryRelease, error) {
+func (c *Client) listReleases(owner, repo string) ([]*github.RepositoryRelease, error) {
 	allReleases := []*github.RepositoryRelease{}
 
 	listOpts := &github.ListOptions{
@@ -89,7 +151,7 @@ func (c *Client) ListReleases(owner, repo string) ([]*github.RepositoryRelease, 
 }
 
 // ListTags lists all tags of the given repository
-func (c *Client) ListTags(owner, repo string) ([]*github.RepositoryTag, error) {
+func (c *Client) listTags(owner, repo string) ([]*github.RepositoryTag, error) {
 	allTags := []*github.RepositoryTag{}
 
 	listOpts := &github.ListOptions{
