@@ -42,17 +42,6 @@ func NewClient(httpClient *http.Client) *Client {
 	}
 }
 
-// MakeReleasesMap makes map of tag name and release
-func makeReleaseMap(releases []*github.RepositoryRelease) map[string]*github.RepositoryRelease {
-	result := map[string]*github.RepositoryRelease{}
-
-	for _, release := range releases {
-		result[*release.TagName] = release
-	}
-
-	return result
-}
-
 // GetRelease returns release metadata of the given tag
 func (c *Client) GetRelease(owner, repo, tag string) (*github.RepositoryRelease, error) {
 	release, _, err := c.repositories.GetReleaseByTag(owner, repo, tag)
@@ -85,7 +74,11 @@ func (c *Client) ListTagsAndReleases(owner, repo string) ([]*Tag, error) {
 		return []*Tag{}, err
 	}
 
-	releasesMap := makeReleaseMap(releases)
+	releasesMap := map[string]*github.RepositoryRelease{}
+
+	for _, release := range releases {
+		releasesMap[*release.TagName] = release
+	}
 
 	ts := []*Tag{}
 
