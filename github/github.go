@@ -26,8 +26,14 @@ type Client struct {
 }
 
 type Release struct {
-	Name      string
-	CreatedAt time.Time
+	ArtifactURLs []string
+	Author       string
+	Body         string
+	Commit       string
+	CreatedAt    time.Time
+	Name         string
+	PublishedAt  time.Time
+	URL          string
 }
 
 type Tag struct {
@@ -40,6 +46,74 @@ func NewClient(httpClient *http.Client) *Client {
 	return &Client{
 		repositories: github.NewClient(httpClient).Repositories,
 	}
+}
+
+// DescribeRelease returns detail of the given release
+func (c *Client) DescribeRelease(owner, repo, tag string) (*Tag, error) {
+	release, err := c.GetRelease(owner, repo, tag)
+	if err != nil {
+		return nil, err
+	}
+
+	commit, err := c.GetTagCommit(owner, repo, tag)
+	if err != nil {
+		return nil, err
+	}
+
+	var body, name string
+
+	if release.Body == nil {
+		body = ""
+	} else {
+		body = *release.Body
+	}
+
+	if release.Name == nil {
+		name = ""
+	} else {
+		name = *release.Name
+	}
+
+	artifactURLs := []string{}
+
+	for _, asset := range release.Assets {
+		artifactURLs = append(artifactURLs, *asset.BrowserDownloadURL)
+	}
+
+	createdAt := *release.CreatedAt
+	publishedAt := *release.PublishedAt
+
+	return &Tag{
+		Name: *release.TagName,
+		Release: &Release{
+			ArtifactURLs: artifactURLs,
+			Author:       *release.Author.Login,
+			Body:         body,
+			Commit:       *commit.SHA,
+			CreatedAt: time.Date(
+				createdAt.Year(),
+				createdAt.Month(),
+				createdAt.Day(),
+				createdAt.Hour(),
+				createdAt.Minute(),
+				createdAt.Second(),
+				createdAt.Nanosecond(),
+				createdAt.Location(),
+			),
+			Name: name,
+			PublishedAt: time.Date(
+				publishedAt.Year(),
+				publishedAt.Month(),
+				publishedAt.Day(),
+				publishedAt.Hour(),
+				publishedAt.Minute(),
+				publishedAt.Second(),
+				publishedAt.Nanosecond(),
+				publishedAt.Location(),
+			),
+			URL: *release.HTMLURL,
+		},
+	}, nil
 }
 
 // GetRelease returns release metadata of the given tag

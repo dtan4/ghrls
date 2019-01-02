@@ -11,11 +11,37 @@ import (
 type fakeRepositoriesService struct{}
 
 func (s fakeRepositoriesService) GetReleaseByTag(owner, repo, tag string) (*github.RepositoryRelease, *github.Response, error) {
-	return &github.RepositoryRelease{}, &github.Response{}, nil
+	tagName := "v1"
+	body := "The quick brown fox jumps over the lazy dog"
+	assetURL := "https://github.com/owner/repo/releases/download/v1/darwin.tar.gz"
+	login := "dtan4"
+	name := "v1"
+	htmlURL := "https://github.com/owner/repo/releases/tag/v1"
+
+	return &github.RepositoryRelease{
+		Assets: []github.ReleaseAsset{
+			github.ReleaseAsset{
+				BrowserDownloadURL: &assetURL,
+			},
+		},
+		Author: &github.User{
+			Login: &login,
+		},
+		Body:        &body,
+		CreatedAt:   &github.Timestamp{time.Date(2018, 12, 13, 0, 30, 24, 0, time.UTC)},
+		HTMLURL:     &htmlURL,
+		Name:        &name,
+		PublishedAt: &github.Timestamp{time.Date(2018, 12, 14, 0, 30, 24, 0, time.UTC)},
+		TagName:     &tagName,
+	}, &github.Response{}, nil
 }
 
 func (s fakeRepositoriesService) GetCommit(owner, repo, sha string) (*github.RepositoryCommit, *github.Response, error) {
-	return &github.RepositoryCommit{}, &github.Response{}, nil
+	commitSHA := "856abeb2b507fc1db16dcaea938775ff938a5355"
+
+	return &github.RepositoryCommit{
+		SHA: &commitSHA,
+	}, &github.Response{}, nil
 }
 
 func (s fakeRepositoriesService) ListReleases(owner, repo string, opt *github.ListOptions) ([]*github.RepositoryRelease, *github.Response, error) {
@@ -80,6 +106,41 @@ func TestGetTagCommit(t *testing.T) {
 
 	if _, err := c.GetTagCommit(owner, repo, tag); err != nil {
 		t.Errorf("want no error, got %#v", err)
+	}
+}
+
+func TestDescribeRelease(t *testing.T) {
+	c := &Client{
+		repositories: fakeRepositoriesService{},
+	}
+
+	owner := "owner"
+	repo := "repo"
+	tag := "v1"
+
+	want := &Tag{
+		Name: "v1",
+		Release: &Release{
+			ArtifactURLs: []string{
+				"https://github.com/owner/repo/releases/download/v1/darwin.tar.gz",
+			},
+			Author:      "dtan4",
+			Body:        "The quick brown fox jumps over the lazy dog",
+			Commit:      "856abeb2b507fc1db16dcaea938775ff938a5355",
+			CreatedAt:   time.Date(2018, 12, 13, 0, 30, 24, 0, time.UTC),
+			Name:        "v1",
+			PublishedAt: time.Date(2018, 12, 14, 0, 30, 24, 0, time.UTC),
+			URL:         "https://github.com/owner/repo/releases/tag/v1",
+		},
+	}
+
+	got, err := c.DescribeRelease(owner, repo, tag)
+	if err != nil {
+		t.Errorf("want no error, got: %#v", err)
+	}
+
+	if !reflect.DeepEqual(*got, *want) {
+		t.Errorf("want: %#v, got: %#v", *want, *got)
 	}
 }
 
