@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/go-github/github"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -42,9 +43,20 @@ type Tag struct {
 }
 
 // NewClient creates new Client object
-func NewClient(httpClient *http.Client) *Client {
+func NewClient(accessToken string) *Client {
+	var hc *http.Client
+
+	if accessToken == "" {
+		hc = nil
+	} else {
+		ts := oauth2.StaticTokenSource(&oauth2.Token{
+			AccessToken: accessToken,
+		})
+		hc = oauth2.NewClient(oauth2.NoContext, ts)
+	}
+
 	return &Client{
-		repositories: github.NewClient(httpClient).Repositories,
+		repositories: github.NewClient(hc).Repositories,
 	}
 }
 

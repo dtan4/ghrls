@@ -81,6 +81,23 @@ func (s fakeRepositoriesService) ListTags(owner string, repo string, opt *github
 	}, &github.Response{}, nil
 }
 
+func TestNewClient(t *testing.T) {
+	testcases := []struct {
+		accessToken string
+	}{
+		{accessToken: ""},
+		{accessToken: "dummyaccesstoken"},
+	}
+
+	for _, tc := range testcases {
+		c := NewClient(tc.accessToken)
+
+		if c == nil {
+			t.Error("want: object, got: nil")
+		}
+	}
+}
+
 func TestDescribeRelease(t *testing.T) {
 	c := &Client{
 		repositories: fakeRepositoriesService{},
