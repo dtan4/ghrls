@@ -21,6 +21,11 @@ type RepositoriesServiceInterface interface {
 	ListTags(owner string, repo string, opt *github.ListOptions) ([]*github.RepositoryTag, *github.Response, error)
 }
 
+type ClientInterface interface {
+	DescribeRelease(owner, repo, tag string) (*Tag, error)
+	ListTagsAndReleases(owner, repo string) ([]*Tag, error)
+}
+
 // Client represents a wrapper of GitHub API client
 type Client struct {
 	repositories RepositoriesServiceInterface
