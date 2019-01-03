@@ -2,14 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"strings"
 	"text/tabwriter"
 
 	"github.com/dtan4/ghrls/github"
 	"github.com/spf13/cobra"
-	"golang.org/x/oauth2"
 )
 
 // getCmd represents the get command
@@ -52,18 +50,7 @@ func doGet(cmd *cobra.Command, args []string) error {
 
 	tag := args[1]
 
-	var httpClient *http.Client
-
-	if rootOpts.GitHubToken == "" {
-		httpClient = nil
-	} else {
-		ts := oauth2.StaticTokenSource(&oauth2.Token{
-			AccessToken: rootOpts.GitHubToken,
-		})
-		httpClient = oauth2.NewClient(oauth2.NoContext, ts)
-	}
-
-	client := github.NewClient(httpClient)
+	client := github.NewClient(rootOpts.GitHubToken)
 
 	t, err := client.DescribeRelease(owner, repo, tag)
 	if err != nil {
