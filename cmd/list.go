@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"text/tabwriter"
+	"time"
 
 	"github.com/dtan4/ghrls/github"
 	"github.com/spf13/cobra"
@@ -30,7 +32,12 @@ v1.5.0            TAG+RELEASE    2016-12-13 08:29:43 +0900 JST    v1.5.0
 v1.5.0-beta.3     TAG+RELEASE    2016-12-09 06:52:35 +0900 JST    v1.5.0-beta.3
 v1.5.0-beta.2     TAG+RELEASE    2016-11-25 07:29:04 +0900 JST    v1.5.0-beta.2
 `,
-	RunE: doList,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		timezone := time.Local
+		client := github.NewClient(rootOpts.GitHubToken)
+
+		return RunList(os.Stderr, os.Stdout, args, client, timezone)
+	},
 }
 
 var (
@@ -42,7 +49,7 @@ var (
 	}
 )
 
-func doList(cmd *cobra.Command, args []string) error {
+func RunList(stdout, stderr io.Writer, args []string, client github.ClientInterface, timezone *time.Location) error {
 	if len(args) != 1 {
 		return fmt.Errorf("Please specify repository <user/name>.")
 	}
@@ -53,8 +60,6 @@ func doList(cmd *cobra.Command, args []string) error {
 	}
 	owner, repo := ss[0], ss[1]
 
-	client := github.NewClient(rootOpts.GitHubToken)
-
 	tags, err := client.ListTagsAndReleases(owner, repo)
 	if err != nil {
 		if strings.Contains(err.Error(), "404 Not Found") {
@@ -63,14 +68,14 @@ func doList(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 4, ' ', 0)
+	w := tabwriter.NewWriter(stdout, 0, 0, 4, ' ', 0)
 	fmt.Fprintln(w, strings.Join(headers, "\t"))
 
 	for _, tag := range tags {
 		ss := []string{}
 
 		if tag.Release != nil {
-			ss = append(ss, tag.Name, "TAG+RELEASE", tag.Release.CreatedAt.Local().String(), tag.Release.Name)
+			ss = append(ss, tag.Name, "TAG+RELEASE", tag.Release.CreatedAt.In(timezone).String(), tag.Release.Name)
 		} else {
 			ss = append(ss, tag.Name, "TAG", "", "")
 		}

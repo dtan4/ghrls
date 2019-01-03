@@ -14,18 +14,6 @@ const (
 	perPage = 100
 )
 
-type RepositoriesServiceInterface interface {
-	GetReleaseByTag(owner, repo, tag string) (*github.RepositoryRelease, *github.Response, error)
-	GetCommit(owner, repo, sha string) (*github.RepositoryCommit, *github.Response, error)
-	ListReleases(owner, repo string, opt *github.ListOptions) ([]*github.RepositoryRelease, *github.Response, error)
-	ListTags(owner string, repo string, opt *github.ListOptions) ([]*github.RepositoryTag, *github.Response, error)
-}
-
-// Client represents a wrapper of GitHub API client
-type Client struct {
-	repositories RepositoriesServiceInterface
-}
-
 type Release struct {
 	ArtifactURLs []string
 	Author       string
@@ -40,6 +28,23 @@ type Release struct {
 type Tag struct {
 	Name    string
 	Release *Release
+}
+
+type RepositoriesServiceInterface interface {
+	GetReleaseByTag(owner, repo, tag string) (*github.RepositoryRelease, *github.Response, error)
+	GetCommit(owner, repo, sha string) (*github.RepositoryCommit, *github.Response, error)
+	ListReleases(owner, repo string, opt *github.ListOptions) ([]*github.RepositoryRelease, *github.Response, error)
+	ListTags(owner string, repo string, opt *github.ListOptions) ([]*github.RepositoryTag, *github.Response, error)
+}
+
+type ClientInterface interface {
+	DescribeRelease(owner, repo, tag string) (*Tag, error)
+	ListTagsAndReleases(owner, repo string) ([]*Tag, error)
+}
+
+// Client represents a wrapper of GitHub API client
+type Client struct {
+	repositories RepositoriesServiceInterface
 }
 
 // NewClient creates new Client object

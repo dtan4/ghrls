@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"text/tabwriter"
+	"time"
 
 	"github.com/dtan4/ghrls/github"
 	"github.com/spf13/cobra"
@@ -34,10 +36,15 @@ See [kubernetes-announce@](https://groups.google.com/forum/#!forum/kubernetes-an
 		`
 Additional binary downloads are linked in the [CHANGELOG](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG.md#downloads-for-v152).
 `,
-	RunE: doGet,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		timezone := time.Local
+		client := github.NewClient(rootOpts.GitHubToken)
+
+		return RunGet(os.Stderr, os.Stdout, args, client, timezone)
+	},
 }
 
-func doGet(cmd *cobra.Command, args []string) error {
+func RunGet(stdout, stderr io.Writer, args []string, client github.ClientInterface, timezone *time.Location) error {
 	if len(args) != 2 {
 		return fmt.Errorf("Please specify repository <user/name> and tag.")
 	}
@@ -50,8 +57,6 @@ func doGet(cmd *cobra.Command, args []string) error {
 
 	tag := args[1]
 
-	client := github.NewClient(rootOpts.GitHubToken)
-
 	t, err := client.DescribeRelease(owner, repo, tag)
 	if err != nil {
 		if strings.Contains(err.Error(), "404 Not Found") {
@@ -60,13 +65,13 @@ func doGet(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+	w := tabwriter.NewWriter(stdout, 0, 0, 1, ' ', 0)
 	fmt.Fprintln(w, "Tag:\t"+t.Name)
 	fmt.Fprintln(w, "Commit:\t"+t.Release.Commit)
 	fmt.Fprintln(w, "Name:\t"+t.Release.Name)
 	fmt.Fprintln(w, "Author:\t"+t.Release.Author)
-	fmt.Fprintln(w, "CreatedAt:\t"+t.Release.CreatedAt.Local().String())
-	fmt.Fprintln(w, "PublishedAt:\t"+t.Release.PublishedAt.Local().String())
+	fmt.Fprintln(w, "CreatedAt:\t"+t.Release.CreatedAt.In(timezone).String())
+	fmt.Fprintln(w, "PublishedAt:\t"+t.Release.PublishedAt.In(timezone).String())
 	fmt.Fprintln(w, "URL:\t"+t.Release.URL)
 
 	if len(t.Release.ArtifactURLs) > 0 {
@@ -80,8 +85,8 @@ func doGet(cmd *cobra.Command, args []string) error {
 	w.Flush()
 
 	if t.Release.Body != "" {
-		fmt.Println("")
-		fmt.Println(t.Release.Body)
+		fmt.Fprintln(stdout, "")
+		fmt.Fprintln(stdout, t.Release.Body)
 	}
 
 	return nil
