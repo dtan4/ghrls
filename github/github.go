@@ -14,6 +14,22 @@ const (
 	perPage = 100
 )
 
+type Release struct {
+	ArtifactURLs []string
+	Author       string
+	Body         string
+	Commit       string
+	CreatedAt    time.Time
+	Name         string
+	PublishedAt  time.Time
+	URL          string
+}
+
+type Tag struct {
+	Name    string
+	Release *Release
+}
+
 type RepositoriesServiceInterface interface {
 	GetReleaseByTag(owner, repo, tag string) (*github.RepositoryRelease, *github.Response, error)
 	GetCommit(owner, repo, sha string) (*github.RepositoryCommit, *github.Response, error)
@@ -29,22 +45,6 @@ type ClientInterface interface {
 // Client represents a wrapper of GitHub API client
 type Client struct {
 	repositories RepositoriesServiceInterface
-}
-
-type Release struct {
-	ArtifactURLs []string
-	Author       string
-	Body         string
-	Commit       string
-	CreatedAt    time.Time
-	Name         string
-	PublishedAt  time.Time
-	URL          string
-}
-
-type Tag struct {
-	Name    string
-	Release *Release
 }
 
 // NewClient creates new Client object
