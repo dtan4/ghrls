@@ -17,7 +17,7 @@ jobs:
       GOBIN: ${{ github.workspace }}/bin
     defaults:
       run:
-        working-directory: ${{ env.GOPATH }}/src/myproject
+        working-directory: ${{ env.GOPATH }}/src/github.com/dtan4/ghrls
 
     steps:
       - name: Checkout
@@ -27,7 +27,7 @@ jobs:
         # https://github.com/actions/setup-go/issues/102
         with:
           fetch-depth: 1
-          path: ${{ env.GOPATH }}/src/myproject
+          path: ${{ env.GOPATH }}/src/github.com/dtan4/ghrls
       - name: Setup Go
         uses: actions/setup-go@v2.1.3
         with:
