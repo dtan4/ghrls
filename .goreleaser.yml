@@ -7,6 +7,8 @@ before:
 builds:
 - env:
   - CGO_ENABLED=0
+  ldflags:
+  - -s -w -X "github.com/dtan4/ghrls/version.Version={{.Version}}" -X "github.com/dtan4/ghrls/version.Revision={{.Commit}}" -extldflags "-static"
   goos:
   - darwin
   - linux
