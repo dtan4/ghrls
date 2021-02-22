@@ -1,3 +1,7 @@
+# [v0.2.1](https://github.com/dtan4/ghrls/releases/tag/v0.2.1) (2021-02-23)
+
+- Correct embedded version information
+
 # [v0.2.0](https://github.com/dtan4/ghrls/releases/tag/v0.2.0) (2021-02-23)
 
 - Improve error handling ([#1](https://github.com/dtan4/ghrls/pull/1), thanks @b4b4r07)
