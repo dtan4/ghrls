@@ -17,7 +17,9 @@ jobs:
         with:
           go-version: 1.16
       - name: Install dependencies
-        run: make deps
+        run: |
+          curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+          make deps
       - name: Run tests
         run: make ci-test
       - name: Send test coverage to Codecov
