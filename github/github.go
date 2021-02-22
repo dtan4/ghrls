@@ -1,10 +1,11 @@
 package github
 
 import (
+	"context"
 	"net/http"
 	"time"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v33/github"
 	"golang.org/x/oauth2"
 )
 
@@ -31,15 +32,15 @@ type Tag struct {
 }
 
 type RepositoriesServiceInterface interface {
-	GetReleaseByTag(owner, repo, tag string) (*github.RepositoryRelease, *github.Response, error)
-	GetCommit(owner, repo, sha string) (*github.RepositoryCommit, *github.Response, error)
-	ListReleases(owner, repo string, opt *github.ListOptions) ([]*github.RepositoryRelease, *github.Response, error)
-	ListTags(owner string, repo string, opt *github.ListOptions) ([]*github.RepositoryTag, *github.Response, error)
+	GetReleaseByTag(ctx context.Context, owner, repo, tag string) (*github.RepositoryRelease, *github.Response, error)
+	GetCommit(ctx context.Context, owner, repo, sha string) (*github.RepositoryCommit, *github.Response, error)
+	ListReleases(ctx context.Context, owner, repo string, opt *github.ListOptions) ([]*github.RepositoryRelease, *github.Response, error)
+	ListTags(ctx context.Context, owner string, repo string, opt *github.ListOptions) ([]*github.RepositoryTag, *github.Response, error)
 }
 
 type ClientInterface interface {
-	DescribeRelease(owner, repo, tag string) (*Tag, error)
-	ListTagsAndReleases(owner, repo string) ([]*Tag, error)
+	DescribeRelease(ctx context.Context, owner, repo, tag string) (*Tag, error)
+	ListTagsAndReleases(ctx context.Context, owner, repo string) ([]*Tag, error)
 }
 
 // Client represents a wrapper of GitHub API client
@@ -66,13 +67,13 @@ func NewClient(accessToken string) *Client {
 }
 
 // DescribeRelease returns detail of the given release
-func (c *Client) DescribeRelease(owner, repo, tag string) (*Tag, error) {
-	release, err := c.getRelease(owner, repo, tag)
+func (c *Client) DescribeRelease(ctx context.Context, owner, repo, tag string) (*Tag, error) {
+	release, err := c.getRelease(ctx, owner, repo, tag)
 	if err != nil {
 		return nil, err
 	}
 
-	commit, err := c.getTagCommit(owner, repo, tag)
+	commit, err := c.getTagCommit(ctx, owner, repo, tag)
 	if err != nil {
 		return nil, err
 	}
@@ -133,8 +134,8 @@ func (c *Client) DescribeRelease(owner, repo, tag string) (*Tag, error) {
 	}, nil
 }
 
-func (c *Client) getRelease(owner, repo, tag string) (*github.RepositoryRelease, error) {
-	release, _, err := c.repositories.GetReleaseByTag(owner, repo, tag)
+func (c *Client) getRelease(ctx context.Context, owner, repo, tag string) (*github.RepositoryRelease, error) {
+	release, _, err := c.repositories.GetReleaseByTag(ctx, owner, repo, tag)
 	if err != nil {
 		return nil, err
 	}
@@ -142,8 +143,8 @@ func (c *Client) getRelease(owner, repo, tag string) (*github.RepositoryRelease,
 	return release, nil
 }
 
-func (c *Client) getTagCommit(owner, repo, tag string) (*github.RepositoryCommit, error) {
-	commit, _, err := c.repositories.GetCommit(owner, repo, tag)
+func (c *Client) getTagCommit(ctx context.Context, owner, repo, tag string) (*github.RepositoryCommit, error) {
+	commit, _, err := c.repositories.GetCommit(ctx, owner, repo, tag)
 	if err != nil {
 		return nil, err
 	}
@@ -152,13 +153,13 @@ func (c *Client) getTagCommit(owner, repo, tag string) (*github.RepositoryCommit
 }
 
 // ListTagsAndReleases retrieves all tags and releases of the given repository
-func (c *Client) ListTagsAndReleases(owner, repo string) ([]*Tag, error) {
-	tags, err := c.listTags(owner, repo)
+func (c *Client) ListTagsAndReleases(ctx context.Context, owner, repo string) ([]*Tag, error) {
+	tags, err := c.listTags(ctx, owner, repo)
 	if err != nil {
 		return []*Tag{}, err
 	}
 
-	releases, err := c.listReleases(owner, repo)
+	releases, err := c.listReleases(ctx, owner, repo)
 	if err != nil {
 		return []*Tag{}, err
 	}
@@ -214,7 +215,7 @@ func (c *Client) ListTagsAndReleases(owner, repo string) ([]*Tag, error) {
 }
 
 // ListReleases lists all releases of the given repository
-func (c *Client) listReleases(owner, repo string) ([]*github.RepositoryRelease, error) {
+func (c *Client) listReleases(ctx context.Context, owner, repo string) ([]*github.RepositoryRelease, error) {
 	allReleases := []*github.RepositoryRelease{}
 
 	listOpts := &github.ListOptions{
@@ -222,7 +223,7 @@ func (c *Client) listReleases(owner, repo string) ([]*github.RepositoryRelease, 
 	}
 
 	for {
-		releases, resp, err := c.repositories.ListReleases(owner, repo, listOpts)
+		releases, resp, err := c.repositories.ListReleases(ctx, owner, repo, listOpts)
 		if err != nil {
 			return []*github.RepositoryRelease{}, err
 		}
@@ -240,7 +241,7 @@ func (c *Client) listReleases(owner, repo string) ([]*github.RepositoryRelease, 
 }
 
 // ListTags lists all tags of the given repository
-func (c *Client) listTags(owner, repo string) ([]*github.RepositoryTag, error) {
+func (c *Client) listTags(ctx context.Context, owner, repo string) ([]*github.RepositoryTag, error) {
 	allTags := []*github.RepositoryTag{}
 
 	listOpts := &github.ListOptions{
@@ -248,7 +249,7 @@ func (c *Client) listTags(owner, repo string) ([]*github.RepositoryTag, error) {
 	}
 
 	for {
-		tags, resp, err := c.repositories.ListTags(owner, repo, listOpts)
+		tags, resp, err := c.repositories.ListTags(ctx, owner, repo, listOpts)
 		if err != nil {
 			return []*github.RepositoryTag{}, err
 		}
