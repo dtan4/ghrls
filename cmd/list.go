@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -60,7 +61,9 @@ func RunList(stdout, stderr io.Writer, args []string, client github.ClientInterf
 	}
 	owner, repo := ss[0], ss[1]
 
-	tags, err := client.ListTagsAndReleases(owner, repo)
+	ctx := context.Background()
+
+	tags, err := client.ListTagsAndReleases(ctx, owner, repo)
 	if err != nil {
 		if strings.Contains(err.Error(), "404 Not Found") {
 			return fmt.Errorf("%s/%s: not found", owner, repo)

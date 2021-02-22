@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -57,7 +58,9 @@ func RunGet(stdout, stderr io.Writer, args []string, client github.ClientInterfa
 
 	tag := args[1]
 
-	t, err := client.DescribeRelease(owner, repo, tag)
+	ctx := context.Background()
+
+	t, err := client.DescribeRelease(ctx, owner, repo, tag)
 	if err != nil {
 		if strings.Contains(err.Error(), "404 Not Found") {
 			return fmt.Errorf("%s/%s@%s : not found", owner, repo, tag)

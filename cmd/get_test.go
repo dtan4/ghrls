@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -14,7 +15,7 @@ type fakeClientForGet struct {
 	Err error
 }
 
-func (c fakeClientForGet) DescribeRelease(owner, repo, tag string) (*github.Tag, error) {
+func (c fakeClientForGet) DescribeRelease(ctx context.Context, owner, repo, tag string) (*github.Tag, error) {
 	if c.Err != nil {
 		return nil, c.Err
 	}
@@ -22,7 +23,7 @@ func (c fakeClientForGet) DescribeRelease(owner, repo, tag string) (*github.Tag,
 	return c.Tag, nil
 }
 
-func (c fakeClientForGet) ListTagsAndReleases(owner, repo string) ([]*github.Tag, error) {
+func (c fakeClientForGet) ListTagsAndReleases(ctx context.Context, owner, repo string) ([]*github.Tag, error) {
 	return []*github.Tag{}, nil
 }
 

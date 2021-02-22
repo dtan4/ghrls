@@ -1,16 +1,17 @@
 package github
 
 import (
+	"context"
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v33/github"
 )
 
 type fakeRepositoriesService struct{}
 
-func (s fakeRepositoriesService) GetReleaseByTag(owner, repo, tag string) (*github.RepositoryRelease, *github.Response, error) {
+func (s fakeRepositoriesService) GetReleaseByTag(ctx context.Context, owner, repo, tag string) (*github.RepositoryRelease, *github.Response, error) {
 	tagName := "v1"
 	body := "The quick brown fox jumps over the lazy dog"
 	assetURL := "https://github.com/owner/repo/releases/download/v1/darwin.tar.gz"
@@ -19,8 +20,8 @@ func (s fakeRepositoriesService) GetReleaseByTag(owner, repo, tag string) (*gith
 	htmlURL := "https://github.com/owner/repo/releases/tag/v1"
 
 	return &github.RepositoryRelease{
-		Assets: []github.ReleaseAsset{
-			github.ReleaseAsset{
+		Assets: []*github.ReleaseAsset{
+			&github.ReleaseAsset{
 				BrowserDownloadURL: &assetURL,
 			},
 		},
@@ -36,7 +37,7 @@ func (s fakeRepositoriesService) GetReleaseByTag(owner, repo, tag string) (*gith
 	}, &github.Response{}, nil
 }
 
-func (s fakeRepositoriesService) GetCommit(owner, repo, sha string) (*github.RepositoryCommit, *github.Response, error) {
+func (s fakeRepositoriesService) GetCommit(ctx context.Context, owner, repo, sha string) (*github.RepositoryCommit, *github.Response, error) {
 	commitSHA := "856abeb2b507fc1db16dcaea938775ff938a5355"
 
 	return &github.RepositoryCommit{
@@ -44,7 +45,7 @@ func (s fakeRepositoriesService) GetCommit(owner, repo, sha string) (*github.Rep
 	}, &github.Response{}, nil
 }
 
-func (s fakeRepositoriesService) ListReleases(owner, repo string, opt *github.ListOptions) ([]*github.RepositoryRelease, *github.Response, error) {
+func (s fakeRepositoriesService) ListReleases(ctx context.Context, owner, repo string, opt *github.ListOptions) ([]*github.RepositoryRelease, *github.Response, error) {
 	tag_v1_13_2_beta_0 := "v1.13.2-beta.0"
 	tag_v1_13_1 := "v1.13.1"
 	release_v1_13_1 := "v1.13.1"
@@ -63,7 +64,7 @@ func (s fakeRepositoriesService) ListReleases(owner, repo string, opt *github.Li
 	}, &github.Response{}, nil
 }
 
-func (s fakeRepositoriesService) ListTags(owner string, repo string, opt *github.ListOptions) ([]*github.RepositoryTag, *github.Response, error) {
+func (s fakeRepositoriesService) ListTags(ctx context.Context, owner string, repo string, opt *github.ListOptions) ([]*github.RepositoryTag, *github.Response, error) {
 	tag_v1_13_2_beta_1 := "v1.13.2-beta.1"
 	tag_v1_13_2_beta_0 := "v1.13.2-beta.0"
 	tag_v1_13_1 := "v1.13.1"
@@ -123,7 +124,7 @@ func TestDescribeRelease(t *testing.T) {
 		},
 	}
 
-	got, err := c.DescribeRelease(owner, repo, tag)
+	got, err := c.DescribeRelease(context.Background(), owner, repo, tag)
 	if err != nil {
 		t.Errorf("want no error, got: %#v", err)
 	}
@@ -162,7 +163,7 @@ func TestListTagsAndReleases(t *testing.T) {
 		},
 	}
 
-	got, err := c.ListTagsAndReleases(owner, repo)
+	got, err := c.ListTagsAndReleases(context.Background(), owner, repo)
 	if err != nil {
 		t.Errorf("want no error, got: %#v", err)
 	}
