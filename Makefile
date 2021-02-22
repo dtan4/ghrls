@@ -1,5 +1,5 @@
 NAME     := ghrls
-VERSION  := v0.1.0
+VERSION  := $(shell git describe --abbrev=0 --tags)
 REVISION := $(shell git rev-parse --short HEAD)
 
 SRCS    := $(shell find . -type f -name '*.go')
