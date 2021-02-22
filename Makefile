@@ -23,22 +23,12 @@ clean:
 	rm -rf vendor/*
 
 .PHONY: cross-build
-cross-build: deps
+cross-build:
 	for os in darwin linux windows; do \
 		for arch in amd64 386; do \
 			GOOS=$$os GOARCH=$$arch go build -a -tags netgo -installsuffix netgo $(LDFLAGS) -o dist/$$os-$$arch/$(NAME); \
 		done; \
 	done
-
-.PHONY: dep
-dep:
-ifeq ($(shell command -v dep 2> /dev/null),)
-	go get -u github.com/golang/dep/cmd/dep
-endif
-
-.PHONY: deps
-deps: dep
-	dep ensure -v
 
 .PHONY: dist
 dist:
@@ -56,7 +46,3 @@ install:
 .PHONY: test
 test:
 	go test -cover -v $(NOVENDOR)
-
-.PHONY: update-deps
-update-deps: dep
-	dep ensure -update -v
