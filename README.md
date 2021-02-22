@@ -1,6 +1,6 @@
 # ghrls(1)
 
-[![Build Status](https://travis-ci.org/dtan4/ghrls.svg?branch=master)](https://travis-ci.org/dtan4/ghrls)
+[![GitHub Actions](https://github.com/dtan4/k8stail/workflows/Test/badge.svg)](https://github.com/dtan4/ghrls/actions?query=workflow%3ATest+branch%3Amaster)
 
 List & Describe GitHub Releases
 
